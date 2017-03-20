@@ -1,7 +1,6 @@
 {
-  "extends": "airbnb",
+  "extends": "airbnb-base",
   "plugins": [
-    "jsx-a11y",
     "import"
   ],
   "parser": "babel-eslint",
@@ -37,9 +36,5 @@
     "react/forbid-prop-types": [
       "off"
     ]
-  },
-  "globals": {
-    "$": true,
-    "recompose": true
   }
 }
