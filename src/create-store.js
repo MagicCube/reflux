@@ -12,6 +12,9 @@ export default function createStore(reducer, initialState) {
       if (!isPlainObject(action)) {
         throw new Error('Action must be a plain object.');
       }
+      if (action.type === undefined) {
+        throw new Error('Actions may not have an undefined "type" property');
+      }
       state = reducer(state, action);
       const clonedSubscribers = subscribers.slice(0);
       clonedSubscribers.forEach((subscriber) => {
