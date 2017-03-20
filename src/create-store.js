@@ -1,3 +1,5 @@
+import isPlainObject from 'lodash/isPlainObject';
+
 export default function createStore(reducer, initialState) {
   if (typeof reducer !== 'function') {
     throw new Error('Reducer must be a function.');
@@ -7,6 +9,9 @@ export default function createStore(reducer, initialState) {
   const store = {
     getState() { return state; },
     dispatch(action) {
+      if (!isPlainObject(action)) {
+        throw new Error('Action must be a plain object.');
+      }
       state = reducer(state, action);
       const clonedSubscribers = subscribers.slice(0);
       clonedSubscribers.forEach((subscriber) => {
