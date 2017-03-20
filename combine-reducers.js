@@ -1,10 +1,10 @@
 export default function combineReducer(reducerMap) {
   const keys = Object.keys(reducerMap);
   return (state, action) => {
-    const state = {};
+    const newState = {};
     keys.forEach(key => {
-      state[key] = reducerMap[key](state[key], action);
+      newState[key] = reducerMap[key](state[key], action);
     });
-    return state;
+    return newState;
   }
 }
