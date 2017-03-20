@@ -15,7 +15,12 @@ export default function createStore(reducer, initialState) {
     },
     subscribe(subscriber) {
       subscribers.push(subscriber);
+      let unsubstriberCalled = false;
       return () => {
+        if (unsubstriberCalled) {
+          return;
+        }
+        unsubstriberCalled = true;
         if (subscribers.indexOf(subscriber) !== -1) {
           subscribers.splice(
             subscribers.indexOf(subscriber),
