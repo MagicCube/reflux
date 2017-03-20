@@ -9,9 +9,9 @@ export default function createStore(reducer, initialState) {
     dispatch(action) {
       state = reducer(state, action);
       const clonedSubscribers = subscribers.slice(0);
-      clonedSubscribers.forEach(subscriber => {
+      clonedSubscribers.forEach((subscriber) => {
         subscriber.call(store);
-      })
+      });
     },
     subscribe(subscriber) {
       subscribers.push(subscriber);
