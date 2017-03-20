@@ -1,8 +1,8 @@
-export default function createStore(reducer, initialState = {}) {
+export default function createStore(reducer, initialState) {
   if (typeof reducer !== 'function') {
     throw new Error('Reducer must be a function.');
   }
-  let state = initialState;
+  let state = reducer(initialState, { type: '@@reflux/INIT' });
   const subscribers = [];
   const store = {
     getState() { return state; },
