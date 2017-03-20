@@ -23,7 +23,7 @@ describe('createStore', () => {
     }).toThrow();
 
     expect(() => {
-      createStore("test");
+      createStore('test');
     }).toThrow();
 
     expect(() => {
@@ -87,7 +87,7 @@ describe('createStore', () => {
       }
     ]);
 
-    store.dispatch(unknownAction())
+    store.dispatch(unknownAction());
     expect(store.getState()).toEqual([
       {
         id: 1,
@@ -152,5 +152,86 @@ describe('createStore', () => {
     store.dispatch(unknownAction());
     expect(listenerA.mock.calls.length).toBe(4);
     expect(listenerB.mock.calls.length).toBe(2);
-  })
+  });
+
+  it('only removes listener once when unsubscribe is called', () => {
+    const store = createStore(reducers.todos);
+    const listenerA = jest.fn();
+    const listenerB = jest.fn();
+
+    const unsubscribeA = store.subscribe(listenerA);
+    store.subscribe(listenerB);
+
+    unsubscribeA();
+    unsubscribeA();
+
+    store.dispatch(unknownAction());
+    expect(listenerA.mock.calls.length).toBe(0);
+    expect(listenerB.mock.calls.length).toBe(1);
+  });
+
+  it('only removes relevant listener when unsubscribe is called', () => {
+    const store = createStore(reducers.todos);
+    const listener = jest.fn();
+
+    store.subscribe(listener);
+    const unsubscribeSecond = store.subscribe(listener);
+
+    unsubscribeSecond();
+    unsubscribeSecond();
+
+    store.dispatch(unknownAction());
+    expect(listener.mock.calls.length).toBe(1);
+  });
+
+  it('supports removing a subscription within a subscription', () => {
+    const store = createStore(reducers.todos);
+    const listenerA = jest.fn();
+    const listenerB = jest.fn();
+    const listenerC = jest.fn();
+
+    store.subscribe(listenerA);
+    const unSubB = store.subscribe(() => {
+      listenerB();
+      unSubB();
+    });
+    store.subscribe(listenerC);
+
+    store.dispatch(unknownAction());
+    store.dispatch(unknownAction());
+
+    expect(listenerA.mock.calls.length).toBe(2);
+    expect(listenerB.mock.calls.length).toBe(1);
+    expect(listenerC.mock.calls.length).toBe(2);
+  });
+
+  it('delays unsubscribe until the end of current dispatch', () => {
+    const store = createStore(reducers.todos);
+
+    const unsubscribeHandles = [];
+    const doUnsubscribeAll = () => unsubscribeHandles.forEach(
+      unsubscribe => unsubscribe()
+    );
+
+    const listener1 = jest.fn();
+    const listener2 = jest.fn();
+    const listener3 = jest.fn();
+
+    unsubscribeHandles.push(store.subscribe(() => listener1()));
+    unsubscribeHandles.push(store.subscribe(() => {
+      listener2();
+      doUnsubscribeAll();
+    }));
+    unsubscribeHandles.push(store.subscribe(() => listener3()));
+
+    store.dispatch(unknownAction());
+    expect(listener1.mock.calls.length).toBe(1);
+    expect(listener2.mock.calls.length).toBe(1);
+    expect(listener3.mock.calls.length).toBe(1);
+
+    store.dispatch(unknownAction());
+    expect(listener1.mock.calls.length).toBe(1);
+    expect(listener2.mock.calls.length).toBe(1);
+    expect(listener3.mock.calls.length).toBe(1);
+  });
 });
